@@ -22,8 +22,6 @@ const createPost = async (req , res , next) => {
 
     try {
         
-        console.log(req.file)
-
         const isPostExist = await Post.findOne({title})
 
         if(title && isPostExist){ 

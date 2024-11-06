@@ -1,99 +1,3 @@
-// import React, { useState } from 'react'
-// import {useFormik} from "formik"
-// import * as Yup from "yup"
-// import {useMutation} from "@tanstack/react-query"
-// import { createPostAPI } from '../../services/posts/postsApi'
-// import ReactQuill from "react-quill"
-// import 'react-quill/dist/quill.snow.css';
-
-
-// const CreatePost = () => {
-
-    // const [description , setDescription] = useState("")
-
-    // const postMutation = useMutation({
-    //     mutationFn : createPostAPI ,
-    //     mutationKey : ["create-post"],
-    //     onError: (error) => {
-    //         console.error("Caught error in mutation:", error);
-    //         console.error("Error response:", error?.response);
-    //     },
-    // })
-
-
-    // const formik = useFormik({
-    //     initialValues : {
-    //         // title : "" ,
-    //         description : ""
-    //     },
-    //     validationSchema : Yup.object({
-    //         // title : Yup.string().min(5).required("title is required"),
-    //         description : Yup.string().min(5).required("description is required"),
-    //     }),
-    //     onSubmit : (values) => {
-    //         const postData = {
-    //             // title : values.title ,
-    //             description : values.description ,
-    //         }
-    //         postMutation.mutate(postData) // when i call the mutate key the mutationFn function will execute
-    //     }
-    // })
-
-
-    // const {isPending , error , isError} = postMutation
-
-
-    // const errorMessage = isError 
-    //     ? error?.msg || error?.message
-    //     : null;
-
-    
-//   return (
-//     <div>
-
-//         {isPending && <span>Loading....</span>}
-
-//         {isError && (
-//                 <div style={{ color: 'red' }}>
-//                     <p>{errorMessage}</p>
-//                 </div>
-//             )}
-
-//         <form onSubmit={formik.handleSubmit}>
-
-//             <ReactQuill value={formik.values.description} onChange={(value) => {setDescription(value); formik.setFieldValue("description" , value)}}/>
-
-//             {/* {formik.touched.title && formik.errors.title && (<span style={{color : "red"}}>{formik.errors.title}</span>)}
-//             <input type="text" name='title' placeholder='enter title' {...formik.getFieldProps("title")} /> */}
-            
-//             {/* 
-            // {formik.touched.description && formik.errors.description && (<span style={{color : "red"}}>{formik.errors.description}</span>)}            
-//             <input type="text" name='description' placeholder='enter description' {...formik.getFieldProps("description")} /> */}
-
-//             <button type='submit'>create post</button>
-
-//         </form>
-    
-//     </div>
-//   )
-// }
-
-
-// export default CreatePost
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import React, { useState } from 'react'
 import {useFormik} from "formik"
 import * as Yup from "yup"
@@ -101,6 +5,10 @@ import {useMutation} from "@tanstack/react-query"
 import { createPostAPI } from '../../services/posts/postsApi'
 import ReactQuill from "react-quill"
 import 'react-quill/dist/quill.snow.css';
+import { FaTimesCircle } from 'react-icons/fa'
+import { useNavigate } from 'react-router-dom'
+import AlertMessage from '../Alert/AlertMessage'
+
 
 
 const CreatePost = () => {
@@ -109,37 +17,76 @@ const CreatePost = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [description, setDescription] = useState("");
 
+  const navigate = useNavigate()
+
     const postMutation = useMutation({
         mutationFn : createPostAPI ,
         mutationKey : ["create-post"],
+        onSuccess : () => {
+          setDescription("")
+          setImagePreview(null)
+          formik.setFieldValue("description" , "")
+          formik.setFieldValue("image" , null)
+          navigate("/list-posts")
+        }
     })
 
 
     const formik = useFormik({
         initialValues : {
             // title : "" ,
-            description : ""
+            description : "" ,
+            image : ""
         },
         validationSchema : Yup.object({
             // title : Yup.string().min(5).required("title is required"),
             description : Yup.string().min(5).required("description is required"),
+            image : Yup.string().required("image is required"),
         }),
         onSubmit : (values) => {
-            const postData = {
-                // title : values.title ,
-                description : values.description ,
-            }
-            postMutation.mutate(postData) // when i call the mutate key the mutationFn function will execute
+          const formData = new FormData()
+          formData.append("description" , values.description)
+          formData.append("image" , values.image)
+          postMutation.mutate(formData) // when i call the mutate key the mutationFn function will execute
         }
     })
 
 
-    const {isPending , error , isError} = postMutation
+
+    const handleFileChange = async (e) => {
+
+      const file = e.currentTarget.files[0]
+      const allowedImageTypes = ["image/jpeg" , "image/jpg" , "image/png"]
+
+      if(file.size > 1048576){
+        setImageError("File size exceed 1mb")
+        return
+      }
+
+      if(!allowedImageTypes.includes(file.type)){
+        setImageError("Invalid file type")
+        return        
+      }
+
+      formik.setFieldValue("image" , file)
+      setImagePreview(URL.createObjectURL(file))
+      
+    }
+
+    const removeImage = () => {
+      formik.setFieldValue("image" , null)
+      setImagePreview(null)
+    }
+
+
+    const {isPending , error , isError , isSuccess} = postMutation
 
 
     const errorMessage = isError 
         ? error?.msg || error?.message
         : null;
+
+    if (isError) return <AlertMessage type={"error"} message={errorMessage}/>
 
 
   return (
@@ -153,10 +100,13 @@ const CreatePost = () => {
 
         {/* show alert */}
 
+        {isPending && <AlertMessage type={"loading"} message={"Loading please wait ..."}/>}
+        {isSuccess && <AlertMessage type={"loading"} message={"Post created successfully"}/>}
+
         <form onSubmit={formik.handleSubmit} className="space-y-6">
 
           {/* Description Input - Using ReactQuill for rich text editing */}
-          <div>
+          <div className='mb-10'>
 
             <label
               htmlFor="description"
@@ -166,7 +116,7 @@ const CreatePost = () => {
             </label>
 
             {/* ReactQuill here */}
-            <ReactQuill value={formik.values.description} onChange={(value) => {setDescription(value); formik.setFieldValue("description" , value)}}/>
+            <ReactQuill className='h-40' value={formik.values.description} onChange={(value) => {setDescription(value); formik.setFieldValue("description" , value)}}/>
 
             {/* description error */}
             {formik.touched.description && formik.errors.description && (<span style={{color : "red"}}>{formik.errors.description}</span>)}            
@@ -188,7 +138,7 @@ const CreatePost = () => {
               <p className="text-sm text-red-600">{formik.errors.category}</p>
             )} */}
 
-          </div>
+          </div>  
 
           {/* Image Upload Input - File input for uploading images */}
           <div className="flex flex-col items-center justify-center bg-gray-50 p-4 shadow rounded-lg">
@@ -207,7 +157,7 @@ const CreatePost = () => {
                 type="file"
                 name="image"
                 accept="image/*"
-                // onChange={handleFileChange}
+                onChange={handleFileChange}
                 className="hidden"
               />
 
@@ -221,30 +171,36 @@ const CreatePost = () => {
             </div>
 
             {/* Display error message */}
-            {/* {formik.touched.image && formik.errors.image && (
+            {formik.touched.image && formik.errors.image && (
               <p className="text-sm text-red-600">{formik.errors.image}</p>
-            )} */}
+            )}
 
             {/* error message */}
             {imageError && <p className="text-sm text-red-600">{imageError}</p>}
 
             {/* Preview image */}
 
-            {/* {imagePreview && (
+            {imagePreview && (
+
               <div className="mt-2 relative">
+
                 <img
                   src={imagePreview}
                   alt="Preview"
                   className="mt-2 h-24 w-24 object-cover rounded-full"
                 />
+
                 <button
                   onClick={removeImage}
                   className="absolute right-0 top-0 transform translate-x-1/2 -translate-y-1/2 bg-white rounded-full p-1"
                 >
                   <FaTimesCircle className="text-red-500" />
                 </button>
+              
               </div>
-            )} */}
+            
+            )} 
+            
           </div>
 
           {/* Submit Button - Button to submit the form */}

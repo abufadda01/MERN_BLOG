@@ -3,6 +3,8 @@ import { useQuery , useMutation } from '@tanstack/react-query'
 import { deletePostAPI, getAllPostAPI } from '../../services/posts/postsApi'
 import { Link } from 'react-router-dom'
 import "./post.css"
+import NoDataFoundAlert from '../Alert/NoDataFoundAlert'
+import AlertMessage from '../Alert/AlertMessage'
 
 
 const PostsList = () => {
@@ -36,9 +38,9 @@ const PostsList = () => {
         setPage((prev) => Math.max(prev - 1, 1))
     }
 
-    if (isLoading) return <div>Loading...</div>
-    if (isError) return <div>Error loading posts</div>
-
+    if (isLoading) return <AlertMessage type={"loading"} message={"Loading please wait ..."}/>
+    if (isError) return <AlertMessage type={"error"} message={"Something happened"}/>
+    if(data?.posts?.length <= 0) return <NoDataFoundAlert textMsg={"no posts found"}/>
 
 
 

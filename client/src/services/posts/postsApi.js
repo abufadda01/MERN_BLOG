@@ -4,10 +4,7 @@ import {axiosObj} from "../../utils/axiosObj"
 
 export const createPostAPI = async (postData) => {
     try {
-        const response = await axiosObj.post(`/posts/create` , {
-            title : postData.title ,
-            description : postData.description
-        })
+        const response = await axiosObj.post(`/posts/create` , postData)
         return response.data
     } catch (error) {
         throw error.response ? error.response.data : "Error occured"
