@@ -105,6 +105,8 @@ const CreatePost = () => {
 
         <form onSubmit={formik.handleSubmit} className="space-y-6">
 
+        {isError && <AlertMessage type={"error"} message={errorMessage}/>}
+
           {/* Description Input - Using ReactQuill for rich text editing */}
           <div className='mb-10'>
 
