@@ -6,6 +6,8 @@ import PublicNavbar from './components/Navbar/PublicNavbar'
 import Home from './components/Home/Home'
 import SinglePost from './components/Posts/SinglePost'
 import UpdatePost from './components/Posts/UpdatePost'
+import Login from './components/Templates/Login'
+import Register from './components/Templates/Register'
 
 
 const App = () => {
@@ -24,6 +26,10 @@ const App = () => {
 
         <Route path='/post/:postId' element={<SinglePost/>}/>
 
+        <Route path='/login' element={<Login/>}/>
+
+        <Route path='/register' element={<Register/>}/>
+ 
         {/* <Route path='/post/:postId' element={<UpdatePost/>}/> */}
 
       </Routes>
