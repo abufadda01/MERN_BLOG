@@ -13,6 +13,7 @@ const Login = () => {
   const navigate = useNavigate()
   
   // when we use the mutate key we execute the function inside the mutationFn
+  // the mutationKey key we can use to call same api in other place (ref to this api)
   const {isPending , isSuccess , isError , error , mutate } = useMutation({
     mutationKey : ["user-login"] ,
     mutationFn : loginAPI ,
@@ -86,8 +87,7 @@ const Login = () => {
               <div className="text-red-500 mt-1">{formik.errors.username}</div>
             )}
 
-
-            {/* Pssword */}
+            {/* Password */}
             <label className="block text-sm font-medium mb-2">Password</label>
 
             <div className="flex items-center gap-1 w-full rounded-full p-4 border border-gray-100 shadow mb-3">
@@ -115,6 +115,7 @@ const Login = () => {
                   d="M12.0004 9.14C10.4304 9.14 9.15039 10.42 9.15039 12C9.15039 13.57 10.4304 14.85 12.0004 14.85C13.5704 14.85 14.8604 13.57 14.8604 12C14.8604 10.43 13.5704 9.14 12.0004 9.14Z"
                   fill="#A3A3A3"
                 />
+
               </svg>
 
             </div>
@@ -148,6 +149,7 @@ const Login = () => {
               className="h-14 inline-flex items-center justify-center gap-2 py-4 px-6 rounded-full bg-white w-full text-center border border-gray-100 shadow hover:bg-gray-50 focus:ring focus:ring-orange-200 transition duration-200"
               type="submit"
             >
+
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width={21}
@@ -155,6 +157,7 @@ const Login = () => {
                 viewBox="0 0 21 20"
                 fill="none"
               >
+
                 <path
                   d="M10.5003 1.91667C12.5358 1.91667 14.3903 2.67493 15.8117 3.91839L13.8037 5.92643C12.9021 5.19326 11.7542 4.75001 10.5003 4.75001C7.601 4.75001 5.25033 7.10068 5.25033 10C5.25033 12.8993 7.601 15.25 10.5003 15.25C12.7863 15.25 14.7244 13.7867 15.4456 11.7501L15.5636 11.4167H15.2099H10.7503V8.58334H17.7503V8.61792H18.0003H18.4637C18.5415 9.06752 18.5837 9.52907 18.5837 10C18.5837 14.464 14.9643 18.0833 10.5003 18.0833C6.03631 18.0833 2.41699 14.464 2.41699 10C2.41699 5.53599 6.03631 1.91667 10.5003 1.91667Z"
                   fill="#FFC107"
@@ -173,6 +176,7 @@ const Login = () => {
                   d="M18.6713 8.36791H18V8.33333H10.5V11.6667H15.2096C14.8809 12.5902 14.2889 13.3972 13.5067 13.9879L13.5079 13.9871L16.0871 16.1696C15.9046 16.3354 18.8333 14.1667 18.8333 9.99999C18.8333 9.44124 18.7758 8.89583 18.6713 8.36791Z"
                   fill="#1976D2"
                 />
+
               </svg>
 
               <span className="font-bold font-heading">
@@ -188,7 +192,7 @@ const Login = () => {
       </div>
 
     </div>
-  );
-};
+  )
+}
 
 export default Login;

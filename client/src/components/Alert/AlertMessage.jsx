@@ -1,11 +1,14 @@
 import React from "react";
+
 import {
   AiOutlineCheckCircle,
   AiOutlineCloseCircle,
   AiOutlineLoading3Quarters,
 } from "react-icons/ai";
 
+
 const AlertMessage = ({ type, message }) => {
+
   let icon;
   let colorClass;
 
@@ -28,12 +31,15 @@ const AlertMessage = ({ type, message }) => {
       icon = null;
   }
 
+
   return (
     <div className={`flex items-center p-4 mb-3  ${colorClass} space-x-3`}>
       {icon}
       <span className="text-sm font-medium">{message}</span>
     </div>
   );
+
 };
+
 
 export default AlertMessage;

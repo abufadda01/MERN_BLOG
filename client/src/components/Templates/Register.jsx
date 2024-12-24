@@ -47,9 +47,11 @@ const Register = () => {
   return (
     <div className="flex flex-wrap pb-24">
 
-      <div className="w-full  p-4">
+      <div className="w-full p-4">
 
         <div className="flex flex-col justify-center py-24 max-w-md mx-auto h-full">
+          
+          <h1 className="text-3xl font-bold font-heading mb-4">Register</h1>
 
           <form onSubmit={formik.handleSubmit}>
 
@@ -58,7 +60,7 @@ const Register = () => {
               className="inline-block text-gray-500 hover: transition duration-200 mb-8"
             >
 
-              <span>Already have an account?</span>
+              <span>Already have an account ? </span>
               <span />
               <span className="font-bold font-heading">Login</span>
 
