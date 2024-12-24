@@ -10,10 +10,19 @@ import AlertMessage from "../Alert/AlertMessage";
 
 const Register = () => {
 
+  const navigate = useNavigate()
+  
   // when we use the mutate key we execute the function inside the mutationFn
   const {isPending , isSuccess , isError , error , mutate } = useMutation({
     mutationKey : ["user-register"] ,
     mutationFn : registerAPI ,
+    // or we can do same thing here but in the onSubmit() inside the formik but with use of mutateSync.then(()).catch((err)) to make the operation execute in sync way
+    onSuccess : () => {
+      formik.setFieldValue("username" , "")
+      formik.setFieldValue("email" , "")
+      formik.setFieldValue("password" , "")
+      navigate("/login")
+    }
   })
 
   const formik = useFormik({
@@ -31,8 +40,6 @@ const Register = () => {
       mutate(values)
     }
   })
-
-
 
 
 

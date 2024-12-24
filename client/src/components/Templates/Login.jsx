@@ -1,14 +1,60 @@
+import { useMutation } from "@tanstack/react-query";
+import { useFormik } from "formik";
 import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { loginAPI } from "../../services/users/usersApi";
+import AlertMessage from "../Alert/AlertMessage";
+import * as Yup from "yup";
+
+
 
 const Login = () => {
+
+  const navigate = useNavigate()
+  
+  // when we use the mutate key we execute the function inside the mutationFn
+  const {isPending , isSuccess , isError , error , mutate } = useMutation({
+    mutationKey : ["user-login"] ,
+    mutationFn : loginAPI ,
+    // or we can do same thing here but in the onSubmit() inside the formik but with use of mutateSync.then(()).catch((err)) to make the operation execute in sync way
+    onSuccess : () => {
+      formik.setFieldValue("email" , "")
+      formik.setFieldValue("username" , "")
+      navigate("/")
+    }
+  })
+
+  const formik = useFormik({
+    initialValues : {
+      username : "" ,
+      password : ""
+    },
+    validationSchema : Yup.object({
+      username : Yup.string().required("username is required"),
+      password : Yup.string().min(6 , "password must be at least 6 digits").required("password is required"),
+    }),
+    onSubmit : (values) => {
+      mutate(values)
+    }
+  })
+
+
+
   return (
     <div className="flex flex-wrap">
+
       <div className="w-full  p-4">
+
         <div className="flex flex-col justify-center max-w-md mx-auto h-full py-12">
-          <form>
+
+          <form onSubmit={formik.handleSubmit}>
+
             <h1 className="text-3xl font-bold font-heading mb-4">Login</h1>
             {/* display error */}
+
+            {isPending && <AlertMessage type={"loading"} message={"Loading please wait ..."}/>}
+            {isSuccess && <AlertMessage type={"success"} message={"Logged in successfully"}/>}
+            {isError && <AlertMessage type={"error"} message={error?.msg || error?.message}/>}
 
             <Link
               to="/register"
@@ -17,31 +63,43 @@ const Login = () => {
               <span>New to Masync Blog? </span>
               <span />
               <span className="font-bold font-heading">Create new account</span>
+
             </Link>
+
             {/* Email */}
-            <label className="block text-sm font-medium mb-2">Email</label>
+            <label
+              className="block text-sm font-medium mb-2"
+              htmlFor="textInput1"
+            >
+              Username
+            </label>
+
             <input
-              type="email"
-              id="email"
-              // {...formik.getFieldProps("email")}
-              className="w-full rounded-full p-4 outline-none border border-gray-100 shadow placeholder-gray-500 focus:ring focus:ring-orange-200 transition duration-200 mb-1"
-              placeholder="masync@email.com"
+              className="w-full rounded-full p-4 outline-none border border-gray-100 shadow placeholder-gray-500 focus:ring focus:ring-orange-200 transition duration-200 mb-4"
+              type="text"
+              placeholder="Enter username"
+              {...formik.getFieldProps("username")}
             />
-            {/* {formik.touched.email && formik.errors.email && (
-              <div className="text-red-500 mb-4 mt-1">
-                {formik.errors.email}
-              </div>
-            )} */}
+
+            {/* error */}
+            {formik.touched.username && formik.errors.username && (
+              <div className="text-red-500 mt-1">{formik.errors.username}</div>
+            )}
+
+
             {/* Pssword */}
             <label className="block text-sm font-medium mb-2">Password</label>
+
             <div className="flex items-center gap-1 w-full rounded-full p-4 border border-gray-100 shadow mb-3">
+
               <input
                 type="password"
                 id="password"
-                // {...formik.getFieldProps("password")}
+                {...formik.getFieldProps("password")}
                 className="outline-none flex-1 placeholder-gray-500 "
                 placeholder="Enter password"
               />
+
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width={24}
@@ -58,24 +116,31 @@ const Login = () => {
                   fill="#A3A3A3"
                 />
               </svg>
+
             </div>
-            {/* {formik.touched.password && formik.errors.password && (
+
+            {formik.touched.password && formik.errors.password && (
               <div className="text-red-500 mt-1">{formik.errors.password}</div>
-            )} */}
+            )}
+
             <div className="mb-8 flex justify-end">
+
               <Link
                 to={"/forgot-password"}
                 className="inline-block text-orange-500 hover:text-orange-600 transition duration-200 text-sm font-semibold"
               >
                 Forgot Password?
               </Link>
+
             </div>
+
             <button
               className="h-14 inline-flex items-center justify-center py-4 px-6 text-white font-bold font-heading rounded-full bg-orange-500 w-full text-center border border-orange-600 shadow hover:bg-orange-600 focus:ring focus:ring-orange-200 transition duration-200 mb-8"
               type="submit"
             >
               Login
             </button>
+
             {/* login with google */}
 
             <a
@@ -109,13 +174,19 @@ const Login = () => {
                   fill="#1976D2"
                 />
               </svg>
+
               <span className="font-bold font-heading">
                 Sign in with Google
               </span>
+
             </a>
+
           </form>
+
         </div>
+
       </div>
+
     </div>
   );
 };

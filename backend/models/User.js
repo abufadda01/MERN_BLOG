@@ -5,7 +5,8 @@ const bcrypt = require("bcrypt")
 const userSchema = new mongoose.Schema({
     username : {
         type : String ,
-        required : true
+        required : true ,
+        unique : true
     },
     profilePic : {
         type : Object ,
@@ -13,7 +14,8 @@ const userSchema = new mongoose.Schema({
     },
     email : {
         type : String ,
-        required : false
+        required : false ,
+        unique : true
     },
     password : {
         type : String ,
