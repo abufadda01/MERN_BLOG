@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import CreatePost from './components/Posts/CreatePost'
 import PostsList from './components/Posts/PostsList'
-import {BrowserRouter as Router , Routes , Route} from "react-router-dom"
+import {BrowserRouter as Router , Routes , Route, Navigate} from "react-router-dom"
 import PublicNavbar from './components/Navbar/PublicNavbar'
 import PrivateNavbar from './components/Navbar/PrivateNavbar'
 import Home from './components/Home/Home'
@@ -13,7 +13,7 @@ import Profile from './components/User/Profile'
 import {useDispatch , useSelector} from "react-redux"
 import { useQuery } from '@tanstack/react-query'
 import { checkAuthStatusAPI } from './services/users/usersApi'
-import { isAuthenticated } from './redux/slices/authSlice'
+import { isAuthenticated, logout } from './redux/slices/authSlice'
 import LoadingSpinner from './components/Templates/LoadingSpinner'
 import AuthRoute from './components/Templates/AuthRoute/AuthRoute'
 import AuthCheckingComponent from './components/Templates/AuthCheckingComponent'
@@ -26,18 +26,22 @@ const App = () => {
 
   const {data : user , isLoading } = useQuery({
     queryKey : ["user-auth"],
-    queryFn : checkAuthStatusAPI
+    queryFn : checkAuthStatusAPI ,
+    onSuccess: (data) => dispatch(isAuthenticated(data)), 
+    onError: () => dispatch(logout()), 
   })
   
   useEffect(() => {
-    dispatch(isAuthenticated(user))
-  } , [user])
+    if (user) {
+      dispatch(isAuthenticated(user));
+    }
+  }, [user, dispatch])
 
-
+  
   const {user : loggedUser} = useSelector((state) => state.auth)
 
 
-  if(isLoading) return <AuthCheckingComponent/>
+  // if(isLoading) return <AuthCheckingComponent/>
 
 
   
@@ -50,15 +54,15 @@ const App = () => {
 
         <Route path='/' element={<Home/>}/>
 
-        <Route path='/create-post' element={<CreatePost/>}/>
+        <Route path='/create-post' element={<AuthRoute><CreatePost/></AuthRoute> }/>
 
         <Route path='/list-posts' element={<PostsList/>}/>
 
         <Route path='/post/:postId' element={<SinglePost/>}/>
 
-        <Route path='/login' element={<Login/>}/>
+        <Route path='/login' element={!loggedUser ? <Login/> : <Navigate to={"/"}/>}/>
 
-        <Route path='/register' element={<Register/>}/>
+        <Route path='/register' element={!loggedUser ? <Register/> : <Navigate to={"/"}/>}/>
 
         <Route path='/profile' element={<AuthRoute><Profile/></AuthRoute>}/>
  
