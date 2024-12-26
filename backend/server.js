@@ -6,6 +6,7 @@ const errorHandler = require("./middlewares/errorHandler")
 const notFound = require("./middlewares/notFound")
 const userRoute = require("./routes/user.route")
 const passport = require("./utils/passport-config")
+const cookieParser = require("cookie-parser")
 
 require("dotenv").config()
 
@@ -15,6 +16,7 @@ const app = express()
 
 app.use(express.json())
 app.use(passport.initialize())
+app.use(cookieParser())
 app.use(cors({
     origin : [process.env.REACT_URL] ,
     credentials : true
@@ -22,7 +24,7 @@ app.use(cors({
 
 
 app.use("/api/v1/posts" , postsRoute)
-app.use("/api/v1/user" , userRoute)
+app.use("/api/v1/users" , userRoute)
 
 
 app.use(notFound)

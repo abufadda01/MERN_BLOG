@@ -160,7 +160,7 @@ const Register = () => {
 
             {/* login with google */}
             <a
-              // href="http://localhost:9000/api/v1/users/auth/google"
+              href="http://localhost:8000/api/v1/users/auth/google/callback"
               className="h-14 inline-flex items-center justify-center gap-2 py-4 px-6 rounded-full bg-white w-full text-center border border-gray-100 shadow hover:bg-gray-50 focus:ring focus:ring-orange-200 transition duration-200"
               type="submit"
             >

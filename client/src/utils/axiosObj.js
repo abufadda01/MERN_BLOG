@@ -4,5 +4,6 @@ const apiUrl = import.meta.env.VITE_API_URL
 console.log(apiUrl)
 
 export const axiosObj = axios.create({
-    baseURL : apiUrl 
+    baseURL : apiUrl ,
+    withCredentials : true
 }) 

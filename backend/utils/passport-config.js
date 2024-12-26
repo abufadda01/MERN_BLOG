@@ -11,8 +11,6 @@ const bcrypt = require("bcrypt")
 
 const dotenv = require("dotenv")
 
-dotenv.config()
-
 
 
 // configure the passport local storage
@@ -46,13 +44,13 @@ passport.use(
 
 
 
-
 // GOOGLE OAUTH
 passport.use(
     new GoogleStrategy({
-        clientID : process.env.GOGGLE_CLIENT_ID ,
-        clientSecret : process.env.GOGGLE_SECRET_ID ,
-        callbackURL : "http://localhost:5500/api/v1/users/auth/google/callback"
+        clientID : process.env.GOOGLE_CLIENT_ID ,
+        clientSecret : process.env.GOOGLE_CLIENT_SECRET ,
+        callbackURL : "http://localhost:8000/api/v1/users/auth/google/callback" ,
+        scope: ["profile", "email"],
     } , async (accessToken , refreshToken , profile , done) => {
         try {
 
