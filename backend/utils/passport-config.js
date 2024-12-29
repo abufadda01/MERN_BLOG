@@ -11,6 +11,8 @@ const bcrypt = require("bcrypt")
 
 const dotenv = require("dotenv")
 
+dotenv.config()
+
 
 
 // configure the passport local storage

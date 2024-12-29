@@ -1,12 +1,15 @@
 const express = require("express")
 const cors = require("cors")
-const postsRoute = require("./routes/posts.route")
 const connectDB = require("./db/connectDB")
 const errorHandler = require("./middlewares/errorHandler")
 const notFound = require("./middlewares/notFound")
-const userRoute = require("./routes/user.route")
-const passport = require("./utils/passport-config")
 const cookieParser = require("cookie-parser")
+const passport = require("./utils/passport-config")
+
+const userRoute = require("./routes/user.route")
+const postsRoute = require("./routes/posts.route")
+const categoryRoute = require("./routes/category.route")
+
 
 require("dotenv").config()
 
@@ -23,8 +26,9 @@ app.use(cors({
 }))
 
 
-app.use("/api/v1/posts" , postsRoute)
 app.use("/api/v1/users" , userRoute)
+app.use("/api/v1/posts" , postsRoute)
+app.use("/api/v1/category" , categoryRoute) 
 
 
 app.use(notFound)

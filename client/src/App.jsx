@@ -99,7 +99,7 @@ const App = () => {
 
         <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
 
-        {/* <Route path='/post/:postId' element={<AuthRoute><UpdatePost/></AuthRoute>}/> */}
+        <Route path='/post/:postId' element={<AuthRoute><UpdatePost/></AuthRoute>}/>
 
       </Routes>
 
