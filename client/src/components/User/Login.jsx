@@ -1,30 +1,36 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFormik } from "formik";
 import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginAPI } from "../../services/users/usersApi";
 import AlertMessage from "../Alert/AlertMessage";
 import * as Yup from "yup";
+import { useDispatch, useSelector } from "react-redux";
+import { isAuthenticated } from "../../redux/slices/authSlice";
+import { useLoginUserMutation } from "../../redux/api/authApi";
+
 
 
 
 const Login = () => {
 
   const navigate = useNavigate()
-  
-  // when we use the mutate key we execute the function inside the mutationFn
-  // the mutationKey key we can use to call same api in other place (ref to this api)
-  const {isPending , isSuccess , isError , error , mutate } = useMutation({
-    mutationKey : ["user-login"] ,
-    mutationFn : loginAPI ,
-    // or we can do same thing here but in the onSubmit() inside the formik but with use of mutateSync.then(()).catch((err)) to make the operation execute in sync way
-    onSuccess : () => {
-      formik.setFieldValue("email" , "")
-      formik.setFieldValue("username" , "")
-      navigate("/profile")
-    }
-  })
+  const dispatch = useDispatch()
 
+  const [loginUser, { isLoading , isError , isSuccess , error }] = useLoginUserMutation()
+
+  // // when we use the mutate key we execute the function inside the mutationFn
+  // // the mutationKey key we can use to call same api in other place (ref to this api)
+  // const {isPending , isSuccess , isError , error , mutateAsync } = useMutation({
+  //   mutationKey : ["user-login"] ,
+  //   mutationFn : loginAPI ,
+  //   // or we can do same thing here but in the onSubmit() inside the formik but with use of mutateSync.then(()).catch((err)) to make the operation execute in sync way
+  //   onSuccess : (data) => {
+
+  //   }
+  // })
+
+  
   const formik = useFormik({
     initialValues : {
       username : "" ,
@@ -34,10 +40,17 @@ const Login = () => {
       username : Yup.string().required("username is required"),
       password : Yup.string().min(6 , "password must be at least 6 digits").required("password is required"),
     }),
-    onSubmit : (values) => {
-      mutate(values)
+    onSubmit : async (values) => {
+      const response = await loginUser(values)
+      console.log(response)
+      dispatch(isAuthenticated({ user: response.data.user, token: response.data.token }))
+      localStorage.setItem("token", JSON.stringify(response.data.token))
+      formik.setFieldValue("username" , "")
+      formik.setFieldValue("password" , "")
+      navigate("/dashboard")
     }
   })
+
 
 
 
@@ -53,7 +66,7 @@ const Login = () => {
             <h1 className="text-3xl font-bold font-heading mb-4">Login</h1>
             {/* display error */}
 
-            {isPending && <AlertMessage type={"loading"} message={"Loading please wait ..."}/>}
+            {isLoading && <AlertMessage type={"loading"} message={"Loading please wait ..."}/>}
             {isSuccess && <AlertMessage type={"success"} message={"Logged in successfully"}/>}
             {isError && <AlertMessage type={"error"} message={error?.msg || error?.message}/>}
 

@@ -11,12 +11,14 @@ import Login from './components/User/Login'
 import Register from './components/User/Register'
 import Profile from './components/User/Profile'
 import {useDispatch , useSelector} from "react-redux"
-import { useQuery } from '@tanstack/react-query'
-import { checkAuthStatusAPI } from './services/users/usersApi'
 import { isAuthenticated, logout } from './redux/slices/authSlice'
 import LoadingSpinner from './components/Templates/LoadingSpinner'
 import AuthRoute from './components/Templates/AuthRoute/AuthRoute'
 import AuthCheckingComponent from './components/Templates/AuthCheckingComponent'
+import GuestRoute from './components/Templates/AuthRoute/GuestRoute'
+import { useGetUserMutation } from './redux/api/authApi'
+import UserDashbaord from './components/User/UserDashboard'
+import AccountSummaryDashboard from './components/Templates/AccountSummary'
 
 
 
@@ -24,49 +26,80 @@ const App = () => {
 
   const dispatch = useDispatch()
 
-  const {data : user , isLoading } = useQuery({
-    queryKey : ["user-auth"],
-    queryFn : checkAuthStatusAPI ,
-    onSuccess: (data) => dispatch(isAuthenticated(data)), 
-    onError: () => dispatch(logout()), 
-  })
-  
+  const user = useSelector((state) => state.auth)
+
+  const [getUser, getUserResponse] = useGetUserMutation()
+
+
   useEffect(() => {
-    if (user) {
-      dispatch(isAuthenticated(user));
+
+    if (user.token && user.user === null) {
+      getUser({ token: user?.token })
     }
-  }, [user, dispatch])
 
-  
-  const {user : loggedUser} = useSelector((state) => state.auth)
+  }, [user.token , user.user])
 
 
-  // if(isLoading) return <AuthCheckingComponent/>
+
+  useEffect(() => {
+
+    if (!getUserResponse.isLoading && !getUserResponse.isUninitialized) {
+
+      if (getUserResponse.isError) {
+
+        dispatch(isAuthenticated({ user: null , token: null }))
+
+      } else {
+
+        dispatch(isAuthenticated({ user: { ...getUserResponse.data }, token: user.token }))
+
+      }
+
+    }
+
+  }, [getUserResponse])
 
 
-  
+
+
+  if (getUserResponse.isLoading) {
+    return <AuthCheckingComponent /> 
+  }
+
+
+
   return (
     <Router>
 
-      {loggedUser ? <PrivateNavbar/> : <PublicNavbar/> }
+      {user?.user ? <PrivateNavbar/> : <PublicNavbar/>}
       
       <Routes>
 
-        <Route path='/' element={<Home/>}/>
+        <Route path='/' element={<AuthRoute><Home/></AuthRoute>}/>
+        
+        {/* nested routes */}
+        <Route path='/dashboard' element={<AuthRoute><UserDashbaord/></AuthRoute>}>
+    
+          <Route path='' element={<AuthRoute><AccountSummaryDashboard /></AuthRoute>} />
+          
+          <Route path='create-post' element={<AuthRoute><CreatePost /></AuthRoute>} />
+    
+        </Route>
 
-        <Route path='/create-post' element={<AuthRoute><CreatePost/></AuthRoute> }/>
+        
+        <Route path='/list-posts' element={<AuthRoute><PostsList /></AuthRoute>} />
+        
+        <Route path='/post/:postId' element={<AuthRoute><SinglePost /></AuthRoute>} />
+        
+        <Route path='/update-post/:postId' element={<AuthRoute><UpdatePost /></AuthRoute>} />
+        
+        <Route path='/profile' element={<AuthRoute><Profile /></AuthRoute>} />
 
-        <Route path='/list-posts' element={<PostsList/>}/>
+        <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
 
-        <Route path='/post/:postId' element={<SinglePost/>}/>
+        <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
 
-        <Route path='/login' element={!loggedUser ? <Login/> : <Navigate to={"/"}/>}/>
-
-        <Route path='/register' element={!loggedUser ? <Register/> : <Navigate to={"/"}/>}/>
-
-        <Route path='/profile' element={<AuthRoute><Profile/></AuthRoute>}/>
- 
-        {/* <Route path='/post/:postId' element={<UpdatePost/>}/> */}
+        {/* <Route path='/post/:postId' element={<AuthRoute><UpdatePost/></AuthRoute>}/> */}
 
       </Routes>
 

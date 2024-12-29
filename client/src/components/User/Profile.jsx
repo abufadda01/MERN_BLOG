@@ -7,20 +7,6 @@ import { isAuthenticated } from '../../redux/slices/authSlice'
 
 
 const Profile = () => {
-    
-    const dispatch = useDispatch()
-
-    const {data : user , isLoading} = useQuery({
-        queryKey : ["user-auth"],
-        queryFn : checkAuthStatusAPI
-    })
-    
-    useEffect(() => {
-        dispatch(isAuthenticated(user))
-    } , [user])
-
-
-
 
   return (
     <div>Profile</div>

@@ -6,7 +6,7 @@ const mongoose = require("mongoose")
 
 
 const createPost = async (req , res , next) => {
-
+    
     const createPostSchema = Joi.object({
         title : Joi.string().min(5).optional() ,
         description : Joi.string().min(5).required()
@@ -30,7 +30,8 @@ const createPost = async (req , res , next) => {
         
         const newPost = new Post({
             description ,
-            image : req.file
+            image : req.file ,
+            author : req.user._id
         })
 
         await newPost.save()

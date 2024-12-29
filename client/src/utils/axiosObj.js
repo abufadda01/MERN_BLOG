@@ -5,5 +5,4 @@ console.log(apiUrl)
 
 export const axiosObj = axios.create({
     baseURL : apiUrl ,
-    withCredentials : true
 }) 

@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {useMutation} from "@tanstack/react-query"
 import { registerAPI } from "../../services/users/usersApi";
 import AlertMessage from "../Alert/AlertMessage";
+import { useRegisterUserMutation } from "../../redux/api/authApi";
 
 
 
@@ -12,18 +13,20 @@ const Register = () => {
 
   const navigate = useNavigate()
   
+  const [registerUser, { isLoading , isError , isSuccess , error }] = useRegisterUserMutation()
+
   // when we use the mutate key we execute the function inside the mutationFn
-  const {isPending , isSuccess , isError , error , mutate } = useMutation({
-    mutationKey : ["user-register"] ,
-    mutationFn : registerAPI ,
-    // or we can do same thing here but in the onSubmit() inside the formik but with use of mutateSync.then(()).catch((err)) to make the operation execute in sync way
-    onSuccess : () => {
-      formik.setFieldValue("username" , "")
-      formik.setFieldValue("email" , "")
-      formik.setFieldValue("password" , "")
-      navigate("/login")
-    }
-  })
+  // const {isPending , isSuccess , isError , error , mutate } = useMutation({
+  //   mutationKey : ["user-register"] ,
+  //   mutationFn : registerAPI ,
+  //   // or we can do same thing here but in the onSubmit() inside the formik but with use of mutateSync.then(()).catch((err)) to make the operation execute in sync way
+  //   onSuccess : () => {
+      // formik.setFieldValue("username" , "")
+      // formik.setFieldValue("email" , "")
+      // formik.setFieldValue("password" , "")
+      // navigate("/login")
+  //   }
+  // })
 
   const formik = useFormik({
     initialValues : {
@@ -36,8 +39,12 @@ const Register = () => {
       email : Yup.string().email("enter a valid email structure").required("email is required"),
       password : Yup.string().min(6 , "password must be at least 6 digits").required("password is required"),
     }),
-    onSubmit : (values) => {
-      mutate(values)
+    onSubmit : async (values) => {
+      await registerUser(values)
+      formik.setFieldValue("username" , "")
+      formik.setFieldValue("email" , "")
+      formik.setFieldValue("password" , "")
+      navigate("/login")
     }
   })
 
@@ -68,7 +75,7 @@ const Register = () => {
 
             {/* show message */}
 
-            {isPending && <AlertMessage type={"loading"} message={"Loading please wait ..."}/>}
+            {isLoading && <AlertMessage type={"loading"} message={"Loading please wait ..."}/>}
             {isSuccess && <AlertMessage type={"success"} message={"account created successfully"}/>}
             {isError && <AlertMessage type={"error"} message={error?.msg || error?.message}/>}
 

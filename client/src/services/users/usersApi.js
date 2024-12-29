@@ -35,7 +35,7 @@ export const loginAPI = async (userData) => {
 
 export const logoutAPI = async () => {
     try {
-        const response = await axiosObj.post(`/users/logout`)
+        const response = await axiosObj.get(`/users/logout` , {withCredentials : true})
         return response.data
     } catch (error) {
         throw error.response ? error.response.data : "Error occured"
@@ -45,9 +45,13 @@ export const logoutAPI = async () => {
 
 
 
-export const checkAuthStatusAPI = async () => {
+export const checkAuthStatusAPI = async (token) => {
     try {
-        const response = await axiosObj.post(`/users`)
+        const response = await axiosObj.get(`/users` , {
+            headers : {
+                Authorization : `Bearer ${token}`
+            }
+        })
         return response.data
     } catch (error) {
         throw error.response ? error.response.data : "Error occured"

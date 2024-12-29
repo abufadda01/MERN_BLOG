@@ -19,9 +19,9 @@ const postsRoute = express.Router()
 
 postsRoute.post("/create" , auth , upload.single("image") , createPost)
 
-postsRoute.get("/" , getAllPosts)
+postsRoute.get("/" , auth , getAllPosts)
 
-postsRoute.get("/:postId" , getPost)
+postsRoute.get("/:postId" , auth , getPost)
 
 postsRoute.put("/:postId" , auth , updatePost)
 

@@ -11,13 +11,13 @@ userRoute.post("/register" , register)
 
 userRoute.post("/login" , login)
 
-userRoute.post("/logout" , logout)
+userRoute.get("/logout" , logout)
 
 userRoute.get("/auth/google" , googleAuth)
 
 userRoute.get("/auth/google/callback" , googleAuthCallback)
 
-userRoute.post("/" , auth , getLoggedUser)
+userRoute.get("/" , auth , getLoggedUser)
 
 
 

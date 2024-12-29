@@ -4,6 +4,7 @@ import * as Yup from "yup"
 import {useMutation, useQuery} from "@tanstack/react-query"
 import { createPostAPI, getPostAPI, updatePostAPI } from '../../services/posts/postsApi'
 import { useParams } from 'react-router-dom'
+import { useUpdatePostAPIMutation , useGetPostAPIQuery } from '../../redux/api/postsApi'
 
 
 
@@ -11,15 +12,11 @@ const UpdatePost = () => {
 
     const {postId} = useParams()
 
-    const {data : post , isLoading} = useQuery({
-        queryKey : ["single-post" , postId],
-        queryFn : () => getPostAPI(postId)
-    })
+    const {token} = useSelector((state) => state.auth)
 
-    const postMutation = useMutation({
-        mutationFn : updatePostAPI ,
-        mutationKey : ["update-post"]
-    })
+    const {data : post , isLoading : isLoadingGetPost} = useGetPostAPIQuery({token , postId})
+
+    const [updatePostAPI , {isLoading , isError , isSuccess , error}] = useUpdatePostAPIMutation()
 
 
     const formik = useFormik({
@@ -32,18 +29,17 @@ const UpdatePost = () => {
             title : Yup.string().min(5).required("title is required"),
             description : Yup.string().min(5).required("description is required"),
         }),
-        onSubmit : (values) => {
+        onSubmit : async (values) => {
             const postData = {
                 title : values.title ,
                 description : values.description ,
                 _id : post?._id
             }
-            postMutation.mutate(postData) // when i call the mutate key the mutationFn function will execute
+            await updatePostAPI({postData , token})
         }
     })
 
 
-    const {isPending , error , isError , isSuccess} = postMutation
 
 
   return (
@@ -53,7 +49,7 @@ const UpdatePost = () => {
 
         <div>
 
-            {isPending && <span>Loading....</span>}
+            {isLoading || isLoadingGetPost && <span>Loading....</span>}
             {isError && <span>{error.message}</span>}
             {isSuccess && <span>Post updated successfully</span>}
 

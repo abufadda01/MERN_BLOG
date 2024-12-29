@@ -8,6 +8,8 @@ import 'react-quill/dist/quill.snow.css';
 import { FaTimesCircle } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import AlertMessage from '../Alert/AlertMessage'
+import { useCreatePostAPIMutation } from '../../redux/api/postsApi'
+import { useSelector } from 'react-redux'
 
 
 
@@ -19,18 +21,9 @@ const CreatePost = () => {
 
   const navigate = useNavigate()
 
-    const postMutation = useMutation({
-        mutationFn : createPostAPI ,
-        mutationKey : ["create-post"],
-        onSuccess : () => {
-          setDescription("")
-          setImagePreview(null)
-          formik.setFieldValue("description" , "")
-          formik.setFieldValue("image" , null)
-          navigate("/list-posts")
-        }
-    })
+  const {token} = useSelector((state) => state.auth)
 
+  const [createPostAPI , {isError , isLoading , isSuccess , error}] = useCreatePostAPIMutation()
 
     const formik = useFormik({
         initialValues : {
@@ -43,13 +36,26 @@ const CreatePost = () => {
             description : Yup.string().min(5).required("description is required"),
             image : Yup.string().required("image is required"),
         }),
-        onSubmit : (values) => {
-          const formData = new FormData()
-          formData.append("description" , values.description)
-          formData.append("image" , values.image)
-          postMutation.mutate(formData) // when i call the mutate key the mutationFn function will execute
+        onSubmit: async (values) => {
+
+          const formData = new FormData();
+
+          formData.append("description", values.description);
+          formData.append("image", values.image);
+        
+          try {
+            await createPostAPI({ token, postData: formData })  
+            setDescription("")
+            setImagePreview(null)
+            formik.setFieldValue("description" , "")
+            formik.setFieldValue("image" , null)
+            navigate("/list-posts")
+          } catch (error) {
+            console.error('API error:', error);
+          }
         }
     })
+
 
 
 
@@ -79,14 +85,10 @@ const CreatePost = () => {
     }
 
 
-    const {isPending , error , isError , isSuccess} = postMutation
-
-
-    const errorMessage = isError 
-        ? error?.msg || error?.message
-        : null;
+    const errorMessage = isError ? error?.msg || error?.message : null
 
     if (isError) return <AlertMessage type={"error"} message={errorMessage}/>
+
 
 
   return (
@@ -100,8 +102,8 @@ const CreatePost = () => {
 
         {/* show alert */}
 
-        {isPending && <AlertMessage type={"loading"} message={"Loading please wait ..."}/>}
-        {isSuccess && <AlertMessage type={"loading"} message={"Post created successfully"}/>}
+        {isLoading && <AlertMessage type={"loading"} message={"Loading please wait ..."}/>}
+        {isSuccess && <AlertMessage type={"success"} message={"Post created successfully"}/>}
 
         <form onSubmit={formik.handleSubmit} className="space-y-6">
 

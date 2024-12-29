@@ -23,24 +23,21 @@ export default function PrivateNavbar() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
-  // // user mutation
   const logoutMutation = useMutation({
     mutationKey: ["logout"],
     mutationFn: logoutAPI,
-  });
+  })
 
 
-  // //logout handler
   const logoutHandler = async () => {
     logoutMutation
       .mutateAsync()
       .then(() => {
-        //dispatch action to logout
-        dispatch(logout(null));
+        dispatch(logout())
         navigate("/login")
       })
       .catch((e) => console.log(e));
-  };
+  }
 
 
 

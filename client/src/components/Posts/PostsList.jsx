@@ -5,25 +5,25 @@ import { Link } from 'react-router-dom'
 import "./post.css"
 import NoDataFoundAlert from '../Alert/NoDataFoundAlert'
 import AlertMessage from '../Alert/AlertMessage'
+import { useGetAllPostAPIQuery , useDeletePostAPIMutation } from '../../redux/api/postsApi'
+import { useSelector } from 'react-redux'
+
 
 
 const PostsList = () => {
 
     const [page, setPage] = useState(1)
 
-    const {data , isError , isLoading , error , refetch} = useQuery({
-        queryKey : ["lists-posts" , page] , // the queryKey includes the page so that the cache updates correctly with each page.
-        queryFn : () => getAllPostAPI(page) , // invoke the service function so we can send the page as a parameter 
-    })
+    const {token} = useSelector((state) => state.auth)
 
-    const {isSuccess , isError : isDeletePostError , error : deletePostError , mutateAsync} = useMutation({
-        mutationFn : deletePostAPI ,
-        mutationKey : ["delete-post"]
-    })
+    const {data , isError , isLoading , error , refetch} = useGetAllPostAPIQuery({token , page})
+
+    const [deletePostAPI , {isLoading : isLoadingDeletePost , isSuccess , isError : isDeletePostError , error : deletePostError}] = useDeletePostAPIMutation()
 
     const handlePostDelete = async (postId) => {
         try {
-            await mutateAsync(postId).then(() => refetch()).catch((e) => console.log(e))
+            await deletePostAPI({token , postId})
+            await refetch()
         } catch (error) {
             console.log(error.response.data.msg)
         }
@@ -38,8 +38,8 @@ const PostsList = () => {
         setPage((prev) => Math.max(prev - 1, 1))
     }
 
-    if (isLoading) return <AlertMessage type={"loading"} message={"Loading please wait ..."}/>
-    if (isError) return <AlertMessage type={"error"} message={"Something happened"}/>
+    if (isLoading || isLoadingDeletePost) return <AlertMessage type={"loading"} message={"Loading please wait ..."}/>
+    if (isError || isDeletePostError) return <AlertMessage type={"error"} message={"Something happened"}/>
     if(data?.posts?.length <= 0) return <NoDataFoundAlert textMsg={"no posts found"}/>
 
 

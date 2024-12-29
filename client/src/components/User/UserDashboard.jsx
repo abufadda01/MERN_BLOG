@@ -1,5 +1,6 @@
 import { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+
 import {
   Cog6ToothIcon,
   HomeIcon,
@@ -67,7 +68,9 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
+
 export default function UserDashbaord() {
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   //Get the auth user from redux store
 

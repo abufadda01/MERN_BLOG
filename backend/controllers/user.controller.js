@@ -54,16 +54,9 @@ const login = async (req , res , next) => {
 
             const token = jwt.sign({userId : user?._id} , process.env.JWT_SECRET , {expiresIn : process.env.JWT_EXPIRE})
 
-            res.cookie("token" , token , {
-                httpOnly : true ,
-                secure : false ,
-                sameSite : "strict" ,
-                maxAge : 24 * 60 * 60 * 1000
-            })
-
             user.password = undefined
 
-            res.status(200).json(user)
+            res.status(200).json({user , token})
 
         })(req , res , next)
 
@@ -116,15 +109,12 @@ const googleAuthCallback = async (req , res , next) => {
 
             const token = jwt.sign({userId : user?._id} , process.env.JWT_SECRET , {expiresIn : process.env.JWT_EXPIRE})
 
-            res.cookie("token" , token , {
-                httpOnly : true ,
-                secure : false ,
-                sameSite : "strict" ,
-                maxAge : 24 * 60 * 60 * 1000
+            return res.json({
+                message: 'Authentication successful',
+                token: token,
+                redirectUrl: `${process.env.REACT_URL}/dashboard`
             })
-
-            res.redirect(`${process.env.REACT_URL}/dashboard`)
-
+            
         })(req , res , next)
 
     } catch (error) {
