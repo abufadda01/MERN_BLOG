@@ -2,6 +2,7 @@ const Post = require("../models/Post")
 const Joi = require("joi")
 const createError = require("../utils/createError")
 const mongoose = require("mongoose")
+const Category = require("../models/Category")
 
 
 
@@ -9,7 +10,8 @@ const createPost = async (req , res , next) => {
     
     const createPostSchema = Joi.object({
         title : Joi.string().min(5).optional() ,
-        description : Joi.string().min(5).required()
+        description : Joi.string().min(5).required() ,
+        category : Joi.string().required() ,
     })
 
     const {value , error} = createPostSchema.validate(req.body , {abortEarly : false})
@@ -18,10 +20,16 @@ const createPost = async (req , res , next) => {
         return next(createError("Invalid new post credentials" , 400))
     }
 
-    const {title , description} = value
+    const {title , description , category} = value
 
     try {
         
+        let isCategoryExist = await Category.findById(category)
+
+        if(!isCategoryExist){
+            return next(createError("Category not exist" , 404))
+        }
+
         const isPostExist = await Post.findOne({title})
 
         if(title && isPostExist){ 
@@ -31,8 +39,13 @@ const createPost = async (req , res , next) => {
         const newPost = new Post({
             description ,
             image : req.file ,
-            author : req.user._id
+            author : req.user._id,
+            category
         })
+
+        isCategoryExist.posts.push(newPost._id)
+
+        await isCategoryExist.save()
 
         await newPost.save()
 
@@ -51,6 +64,8 @@ const getAllPosts = async (req , res , next) => {
 
     const getPostsQuerySchema = Joi.object({
         page : Joi.number().default(1).optional() ,
+        title : Joi.string().optional() ,
+        category : Joi.string().default(1).optional() ,
     })
 
     const {value , error} = getPostsQuerySchema.validate(req.query , {abortEarly : false})
@@ -59,14 +74,24 @@ const getAllPosts = async (req , res , next) => {
         return next(createError("Invalid posts query" , 400))
     }
 
-    const {page} = value
+    const {page , title , category} = value
 
     try {
         
-        const limit = 10
+        let filter = {}
+
+        if(category){
+            filter.category = category
+        }
+ 
+        if(title){
+            filter.title = title
+        }
+
+        const limit = 10                                                                                 
         const skip = (page - 1) * limit
 
-        const posts = await Post.find().skip(skip).limit(limit)
+        const posts = await Post.find(filter).skip(skip).limit(limit).sort({"createdAt" : -1}).populate("category")
         
         const totalPosts = await Post.countDocuments() 
 

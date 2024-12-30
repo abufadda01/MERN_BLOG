@@ -19,6 +19,7 @@ import GuestRoute from './components/Templates/AuthRoute/GuestRoute'
 import { useGetUserMutation } from './redux/api/authApi'
 import UserDashbaord from './components/User/UserDashboard'
 import AccountSummaryDashboard from './components/Templates/AccountSummary'
+import AddCategory from './components/Category/AddCategory'
 
 
 
@@ -83,6 +84,8 @@ const App = () => {
           <Route path='' element={<AuthRoute><AccountSummaryDashboard /></AuthRoute>} />
           
           <Route path='create-post' element={<AuthRoute><CreatePost /></AuthRoute>} />
+
+          <Route path='add-category' element={<AuthRoute><AddCategory /></AuthRoute>} />
     
         </Route>
 

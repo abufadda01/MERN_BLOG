@@ -24,7 +24,6 @@ const createCategory = async (req , res , next) => {
 
         const newCategory = new Category({
             categoryName ,
-            description ,
             author : req.user._id
         })
 
@@ -46,7 +45,7 @@ const getAllCategories = async (req , res , next) => {
 
     try {
         
-       const categories = await Category.find({})
+       const categories = await Category.find()
 
        res.status(200).json(categories)
 
@@ -55,6 +54,7 @@ const getAllCategories = async (req , res , next) => {
     }
 
 }
+
 
 
 

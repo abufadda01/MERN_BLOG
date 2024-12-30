@@ -35,6 +35,7 @@ const postSchema = new mongoose.Schema({
     category : {
         type : mongoose.Schema.Types.ObjectId ,
         ref : "categories" ,
+        required : true ,
     },
     viewsCount : {
         type : Number ,

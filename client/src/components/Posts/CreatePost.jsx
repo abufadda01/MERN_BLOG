@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {useFormik} from "formik"
 import * as Yup from "yup"
 import {useMutation} from "@tanstack/react-query"
@@ -10,6 +10,9 @@ import { useNavigate } from 'react-router-dom'
 import AlertMessage from '../Alert/AlertMessage'
 import { useCreatePostAPIMutation } from '../../redux/api/postsApi'
 import { useSelector } from 'react-redux'
+import Select from "react-select"
+import { useGetAllCategoriesQuery } from '../../redux/api/categoryApi'
+import { axiosObj } from '../../utils/axiosObj'
 
 
 
@@ -18,43 +21,72 @@ const CreatePost = () => {
   const [imageError, setImageError] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
   const [description, setDescription] = useState("");
+  const [categories , setCategories] = useState([])
 
+  
   const navigate = useNavigate()
-
+  
   const {token} = useSelector((state) => state.auth)
-
+    
   const [createPostAPI , {isError , isLoading , isSuccess , error}] = useCreatePostAPIMutation()
+  
+  useEffect(() => {
 
-    const formik = useFormik({
-        initialValues : {
-            // title : "" ,
-            description : "" ,
-            image : ""
-        },
-        validationSchema : Yup.object({
-            // title : Yup.string().min(5).required("title is required"),
-            description : Yup.string().min(5).required("description is required"),
-            image : Yup.string().required("image is required"),
-        }),
-        onSubmit: async (values) => {
-
-          const formData = new FormData();
-
-          formData.append("description", values.description);
-          formData.append("image", values.image);
-        
-          try {
-            await createPostAPI({ token, postData: formData })  
-            setDescription("")
-            setImagePreview(null)
-            formik.setFieldValue("description" , "")
-            formik.setFieldValue("image" , null)
-            navigate("/list-posts")
-          } catch (error) {
-            console.error('API error:', error);
+    const getCategories = async () => {
+      try {
+        const response = await axiosObj.get("/category" , {
+          headers : {
+            "Authorization" : `Bearer ${token}`
           }
-        }
-    })
+        })
+        setCategories(response.data)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
+    getCategories()
+
+  } , [isLoading , isSuccess])
+
+
+  
+
+  const formik = useFormik({
+    initialValues : {
+      // title : "" ,
+      description : "" ,
+      image : "" ,
+      category : ""
+    },
+    validationSchema : Yup.object({
+      // title : Yup.string().min(5).required("title is required"),
+      description : Yup.string().min(5).required("description is required"),
+      image : Yup.string().required("image is required"),
+      category : Yup.string().required("category is required"),
+    }),
+    onSubmit: async (values) => {
+
+      const formData = new FormData();
+
+      formData.append("description", values.description);
+      formData.append("image", values.image);
+      formData.append("category", values.category);
+        
+      try {
+        await createPostAPI({ token, postData: formData })  
+        setDescription("")
+        setImagePreview(null)
+        formik.setFieldValue("description" , "")
+        formik.setFieldValue("image" , null)
+        formik.setFieldValue("category" , "")
+        navigate("/list-posts", { state: { refresh: true } })
+      } catch (error) {
+        console.error('API error:', error);
+      }
+    }
+
+  })
 
 
 
@@ -105,7 +137,7 @@ const CreatePost = () => {
         {isLoading && <AlertMessage type={"loading"} message={"Loading please wait ..."}/>}
         {isSuccess && <AlertMessage type={"success"} message={"Post created successfully"}/>}
 
-        <form onSubmit={formik.handleSubmit} className="space-y-6">
+        <form onSubmit={formik.handleSubmit} className="space-y-8">
 
         {isError && <AlertMessage type={"error"} message={errorMessage}/>}
 
@@ -120,7 +152,7 @@ const CreatePost = () => {
             </label>
 
             {/* ReactQuill here */}
-            <ReactQuill className='h-40' value={formik.values.description} onChange={(value) => {setDescription(value); formik.setFieldValue("description" , value)}}/>
+            <ReactQuill className='h-40 mb-4' value={formik.values.description} onChange={(value) => {setDescription(value); formik.setFieldValue("description" , value)}}/>
 
             {/* description error */}
             {formik.touched.description && formik.errors.description && (<span style={{color : "red"}}>{formik.errors.description}</span>)}            
@@ -137,10 +169,25 @@ const CreatePost = () => {
               Category
             </label>
 
+            <Select
+              name='category'
+              options={categories?.map((category) => {
+                return {
+                  value : category?._id ,
+                  label : category?.categoryName ,
+                }
+              })}
+              onChange={(option) => {
+                return formik.setFieldValue("category" , option.value)
+              }}
+              value={categories?.find((option) => option.value === formik.values.category)}
+              className='mt-1 block w-full'
+            />
+
             {/* display error */}
-            {/* {formik.touched.category && formik.errors.category && (
+            {formik.touched.category && formik.errors.category && (
               <p className="text-sm text-red-600">{formik.errors.category}</p>
-            )} */}
+            )}
 
           </div>  
 

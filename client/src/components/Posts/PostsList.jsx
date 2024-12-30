@@ -1,18 +1,23 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useQuery , useMutation } from '@tanstack/react-query'
 import { deletePostAPI, getAllPostAPI } from '../../services/posts/postsApi'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import "./post.css"
 import NoDataFoundAlert from '../Alert/NoDataFoundAlert'
 import AlertMessage from '../Alert/AlertMessage'
 import { useGetAllPostAPIQuery , useDeletePostAPIMutation } from '../../redux/api/postsApi'
 import { useSelector } from 'react-redux'
+import PostCategory from '../Category/PostCategory'
+import { axiosObj } from '../../utils/axiosObj'
 
 
 
 const PostsList = () => {
 
     const [page, setPage] = useState(1)
+    const [categories , setCategories] = useState([])
+    
+    const location = useLocation()
 
     const {token} = useSelector((state) => state.auth)
 
@@ -28,6 +33,42 @@ const PostsList = () => {
             console.log(error.response.data.msg)
         }
     }
+
+      useEffect(() => {
+    
+        const getCategories = async () => {
+          try {
+            const response = await axiosObj.get("/category" , {
+              headers : {
+                "Authorization" : `Bearer ${token}`
+              }
+            })
+            setCategories(response.data)
+          } catch (error) {
+            console.log(error)
+          }
+        }
+    
+        getCategories()
+    
+      } , [])
+    
+
+    useEffect(() => {
+        if (location?.state?.refresh) {
+          refetch()
+        }
+      }, [location.state, refetch])
+    
+
+
+      // Clear the state to prevent repeated refetches on other renders
+      useEffect(() => {
+        if (location?.state?.refresh) {
+          location.state.refresh = false
+        }
+      }, [location])
+
 
 
     const handleNextPage = () => {
@@ -57,6 +98,10 @@ const PostsList = () => {
                 <h2 className='text-4xl font-bold font-heading mb-10'>Latest articles</h2>
                 
                 {/* post category */}
+                <PostCategory
+                    categories={categories}
+                    // onCategorySelect={handleCategoryfilter}
+                />
 
                 <div className='flex flex-wrap mb-32 -mx-4'>
 
@@ -92,8 +137,8 @@ const PostsList = () => {
                                                 <circle  cx={2} cy={2} r={2} fill='#B8B8B8'/>
                                             </svg>
 
-                                            <div className='py-1 px-2 rounded-md border border-gray-100 text-sm font-medium text-gray-700 inline-block'>
-                                                {/* {post?.category?.categoryName} */}
+                                            <div className='py-1 px-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 inline-block'>
+                                                {post?.category?.categoryName}
                                             </div>
 
                                         </div>
